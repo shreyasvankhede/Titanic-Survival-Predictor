@@ -27,9 +27,17 @@ This project uses a machine learning model (Logistic Regression) to predict whet
 
 ---
 
-## 📸 Sample Output
+## 📸 Screenshots
+![image](https://github.com/user-attachments/assets/c6a02237-2801-4b95-92df-99da2094f080)
 
-![Prediction Result GIF](Data/Images/1.gif)
+![image](https://github.com/user-attachments/assets/f3ad2087-cd61-4498-be28-0dc0a26b7a70)
+
+
+
+
+
+
+
 
 ---
 
