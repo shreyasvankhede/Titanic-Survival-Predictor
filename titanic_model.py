@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import gradio as gr
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
@@ -7,9 +8,17 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder
 
+class TitanicPred:
+  def __init__(self):
+      self.data="Data/Titanic-Dataset.csv"
+      self.reg=self.train_model()
+      self.gif={
+         0:"Data/Images/0.gif",
+         1:"Data/Images/1.gif"
+      }
 
-def model(pclass,sex,age):
-    df=pd.read_csv("Titanic-Dataset.csv")
+  def train_model(self):
+    df=pd.read_csv(self.data)
     Y=df.iloc[:,1].values
     X=df.drop(["PassengerId","Name","SibSp",'Parch','Ticket','Fare','Cabin','Embarked'],axis=1)
     le = LabelEncoder()
@@ -21,29 +30,32 @@ def model(pclass,sex,age):
     X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=0.2,random_state=42)
     regressor=LogisticRegression()
     regressor.fit(X_train,Y_train)
-    np.set_printoptions(precision=2) #prints upto 2 decimals only
-    return regressor.predict([[pclass,sex,age]])
+    return regressor
+  
+  def predict(self,pclass,sex,age):
+     return self.reg.predict([[pclass,sex,age]])
 
-def res(n):
-  if n==0:
-    return "You didnt survive the titanic"
-  else:
-    return "You survived the titanic"
+  def info(self,cl,sex,age):
+   res=self.predict(cl,sex,age)
+   img=self.gif[res[0]]
+   return ("Hooraay !!! You would've survived the titanic" if res else "You would've not survived in the titanic"),img
 
-def info():
-  age=int(input("Enter the age: "))
-  cl=int(input("Enter the passenger class no. (1-3): "))
-  sex=int(input("Enter your gender 0.For Female 1.For male: "))
-  while (age<0 or cl<1 or cl>3 or sex>1 or sex<0):
-    if (sex>1 or sex<0):
-      sex=int(input("Enter a valid number for gender \n1.Male \n0.Female: ") )
-    elif(cl<1 or cl>3):
-      cl=int(input("Enter a valid number for passenger class no. (1-3): "))
-    elif (age<0):
-      age=int(input("Enter a valid number for age (age cant be negative): "))
-    else:
-      break
-  print(res(model(cl,sex,age)))
+def display(obj:TitanicPred):
+    interface=gr.Interface(fn=obj.info,
+                           inputs=[
+                             gr.Slider(1,3,value=2,label="Class Number"),
+                             gr.Radio([("Male",1),("Female",0)],label="Gender"),
+                             gr.Slider(0,100,value=28,label="Enter your age")
+                                   ],
+                           outputs=[gr.Textbox(lines=2,type="text",placeholder="Output"),
+                                    gr.Image(type='filepath',label="Survival status")
+                           ],
+                           title="Titanic Survival Predictor",
+                           description="Enter your prefered class number,age and gender to see if you woudlve survived the titanic"
+                           )
+    interface.launch()
+
 
 if __name__=="__main__":
-    info()
+    obj=TitanicPred()
+    display(obj)
